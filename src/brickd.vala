@@ -150,25 +150,20 @@ class BrickApp : Application {
                         yield write_line_async (out_stream, "OK Until next time...");
                         break;
                     }
-                    var parts = reply.split (" ", 3);
-                    if (parts.length != 3) {
+                    var parts = reply.split (" ", 2);
+                    if (parts.length != 2) {
                         yield write_line_async (out_stream, "BAD Too short");
                         continue;
                     }
-                    uint64 id;
-                    if (!uint64.try_parse (parts[0], out id)) {
-                        yield write_line_async (out_stream, "BAD Invalid ID - must be integer");
-                        continue;
-                    }
-                    switch (parts[1].up ()) {
+                    switch (parts[0].up ()) {
                     case "WATCH":
-                        switch (parts[2].up ()) {
+                        switch (parts[1].up ()) {
                         case "POWER":
                             if (system_battery_voltage_id != 0) {
-                                yield write_line_async (out_stream, "%llu INVALID Already watching POWER".printf(id));
+                                yield write_line_async (out_stream, "INVALID Already watching POWER");
                                 break;
                             }
-                            yield write_line_async (out_stream, "%llu OK".printf (id));
+                            yield write_line_async (out_stream, "OK");
                             
                             system_battery_voltage_id = power_monitor.notify["system-battery-voltage"].connect ((s, p) => {
                                 handle_connection_system_battery_voltage.begin (out_stream);
@@ -177,12 +172,12 @@ class BrickApp : Application {
 
                             break;
                         default:
-                            yield write_line_async (out_stream, "%llu BAD Unknown WATCH target".printf(id));
+                            yield write_line_async (out_stream, "BAD Unknown WATCH target");
                             break;
                         }
                         break;
                     default:
-                        yield write_line_async (out_stream, "%llu BAD Unknown command".printf (id));
+                        yield write_line_async (out_stream, "BAD Unknown command");
                         break;
                     }
                 }
