@@ -169,7 +169,7 @@ class BrickApp : Application {
                         switch (parts[1].up ()) {
                         case "POWER":
                             if (system_battery_voltage_id != 0) {
-                                yield write_line_async (out_stream, "INVALID Already watching POWER");
+                                yield write_line_async (out_stream, "OK Already watching POWER");
                                 break;
                             }
                             yield write_line_async (out_stream, "OK");
