@@ -74,15 +74,12 @@ sealed class PowerMonitor: Object {
     }
 
     void handle_uevent (string action, Device device) {
+        var name = device.get_name ();
         switch (action) {
         case "add":
-            debug ("adding %s", device.get_name ());
+            debug ("adding %s", name);
             var supply = new Supply (device);
-            if (supply.name == null) {
-                critical ("Property \"name\" is null for device %s", device.get_name ());
-                break;
-            }
-            supplies[supply.name] = supply;
+            supplies[name] = supply;
             if (supply.scope == "System" && supply.type_ == "Battery") {
                 debug ("is system battery");
                 system_battery_state_binding = supply.bind_property ("battery-state",
@@ -92,14 +89,10 @@ sealed class PowerMonitor: Object {
             }
             break;
         case "remove":
-            debug ("removing %s", device.get_name ());
-            var name = device.get_property ("POWER_SUPPLY_NAME");
-            if (name == null) {
-                break;
-            }
+            debug ("removing %s", name);
             if (system_battery_state_binding != null) {
                 var system_battery = (Supply)system_battery_state_binding.target;
-                if (system_battery.name == name) {
+                if (system_battery.device.get_name () == name) {
                     system_battery_state_binding.unbind ();
                     system_battery_state_binding = null;
                     system_battery_state = BatteryState.OK;
