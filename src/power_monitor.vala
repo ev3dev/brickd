@@ -257,16 +257,20 @@ sealed class Supply: Object {
         return BatteryState.OK;
     }
 
+    /**
+     * Poll the system battery for changes.
+     */
     bool handle_timeout () {
-        // poll the voltage
+        // have to change at least 0.01V before updating the voltage property
         var new_voltage = _get_voltage ();
-        if (voltage != new_voltage) {
+        if ((voltage - new_voltage).abs () >= 10) {
             voltage = new_voltage;
         }
         var new_state = _get_battery_state ();
         if (battery_state == new_state) {
             battery_state_debounce = 0;
         }
+
         else {
             battery_state_debounce++;
             if (battery_state_debounce >= 10) {
