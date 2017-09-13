@@ -44,9 +44,20 @@ enum BatteryState {
 sealed class PowerMonitor: Object {
     Client client;
     HashTable<string, Supply> supplies;
-    Supply? system_battery;
-    ulong system_battery_signal_id;
+    Binding? system_battery_state_binding;
+    Binding? system_battery_voltage_binding;
     ulong uevent_id;
+
+    /**
+     * Gets the state of the system battery or BatteryState.OK if there is no
+     * battery.
+     */
+    public BatteryState system_battery_state { get; internal set; }
+
+    /**
+     * Gets the system battery voltage in mV or 0 if there is no battery.
+     */
+    public int system_battery_voltage { get; internal set; }
 
     public PowerMonitor () {
         Object ();
@@ -74,12 +85,10 @@ sealed class PowerMonitor: Object {
             supplies[supply.name] = supply;
             if (supply.scope == "System" && supply.type_ == "Battery") {
                 debug ("is system battery");
-                system_battery = supply;
-                system_battery_signal_id = system_battery.notify["battery-state"].connect (handle_system_battery_state);
-                Idle.add (() => {
-                    system_battery.notify_property ("battery-state");
-                    return Source.REMOVE;
-                });
+                system_battery_state_binding = supply.bind_property ("battery-state",
+                    this, "system-battery-state", BindingFlags.SYNC_CREATE);
+                system_battery_voltage_binding = supply.bind_property ("voltage",
+                    this, "system-battery-voltage", BindingFlags.SYNC_CREATE);
             }
             break;
         case "remove":
@@ -88,20 +97,22 @@ sealed class PowerMonitor: Object {
             if (name == null) {
                 break;
             }
-            if (system_battery != null && system_battery.name == name) {
-                system_battery.disconnect (system_battery_signal_id);
-                system_battery = null;
+            if (system_battery_state_binding != null) {
+                var system_battery = (Supply)system_battery_state_binding.target;
+                if (system_battery.name == name) {
+                    system_battery_state_binding.unbind ();
+                    system_battery_state_binding = null;
+                    system_battery_state = BatteryState.OK;
+                    system_battery_voltage_binding.unbind ();
+                    system_battery_voltage_binding = null;
+                    system_battery_voltage = 0;
+                }
             }
+            
             supplies.remove (name);
             break;
         }
     }
-
-    void handle_system_battery_state (Object source, ParamSpec pspec) {
-        system_battery_event (system_battery.battery_state);
-    }
-
-    public signal void system_battery_event (BatteryState state);
 }
 
 sealed class Supply: Object {

@@ -45,7 +45,10 @@ class BrickApp : Application {
     public override void activate () {
         try {
             power_monitor = new PowerMonitor ();
-            power_monitor.system_battery_event.connect (handle_system_battery_event);
+            power_monitor.notify["system-battery-state"].connect ((s, p) => {
+                handle_system_battery_state ();
+            });
+            handle_system_battery_state ();
 
             // just listen on localhost to prevent remote meddling
             listener = new SocketListener ();
@@ -63,10 +66,10 @@ class BrickApp : Application {
     }
 
     /**
-     * Global handler for system battery events.
+     * Global handler for system battery state changes.
      */
-    void handle_system_battery_event (BatteryState state) {
-        switch (state) {
+    void handle_system_battery_state () {
+        switch (power_monitor.system_battery_state) {
         case BatteryState.LOW:
             try {
                 var wall = new Subprocess (SubprocessFlags.NONE, "/usr/bin/wall",
@@ -79,6 +82,7 @@ class BrickApp : Application {
             break;
         case BatteryState.CRITICAL:
             try {
+                message ("Critical battery level. Powering off NOW!");
                 var poweroff = new Subprocess (SubprocessFlags.NONE, "/sbin/poweroff");
                 poweroff.wait_async.begin ();
             }
@@ -119,7 +123,8 @@ class BrickApp : Application {
     async void handle_connection (SocketConnection connection) throws Error {
         var in_stream = new DataInputStream (connection.input_stream);
         var out_stream = connection.output_stream;
-        ulong system_battery_event_id = 0;
+        ulong system_battery_state_id = 0;
+        ulong system_battery_voltage_id = 0;
 
         try {
             yield write_line_async (out_stream, "BRICKD VERSION %s".printf (BRICKD_VERSION));
@@ -130,16 +135,11 @@ class BrickApp : Application {
             }
             else {
                 yield write_line_async (out_stream, "OK");
-                system_battery_event_id = power_monitor.system_battery_event.connect (state => {
-                    switch (state) {
-                    case BatteryState.LOW:
-                        write_line_async.begin (out_stream, "MSG WARN Battery is getting low");
-                        break;
-                    case BatteryState.CRITICAL:
-                        write_line_async.begin (out_stream, "MSG CRITICAL System is shutting down due to low battery");
-                        break;
-                    }
+                system_battery_state_id = power_monitor.notify["system-battery-state"].connect ((s, p) => {
+                    handle_connection_system_battery_state.begin (out_stream);
                 });
+                yield handle_connection_system_battery_state (out_stream);
+
                 while (true) {
                     reply = yield in_stream.read_line_async ();
                     if (reply == null) {
@@ -164,8 +164,17 @@ class BrickApp : Application {
                     case "WATCH":
                         switch (parts[2].up ()) {
                         case "POWER":
+                            if (system_battery_voltage_id != 0) {
+                                yield write_line_async (out_stream, "%llu INVALID Already watching POWER".printf(id));
+                                break;
+                            }
                             yield write_line_async (out_stream, "%llu OK".printf (id));
-                            watch_power.begin (out_stream);
+                            
+                            system_battery_voltage_id = power_monitor.notify["system-battery-voltage"].connect ((s, p) => {
+                                handle_connection_system_battery_voltage.begin (out_stream);
+                            });
+                            yield handle_connection_system_battery_voltage (out_stream);
+
                             break;
                         default:
                             yield write_line_async (out_stream, "%llu BAD Unknown WATCH target".printf(id));
@@ -183,17 +192,35 @@ class BrickApp : Application {
             debug ("Connection error: %s", err.message);
         }
 
-        if (system_battery_event_id != 0) {
-            power_monitor.disconnect (system_battery_event_id);
+        if (system_battery_voltage_id != 0) {
+            power_monitor.disconnect (system_battery_voltage_id);
+        }
+        if (system_battery_state_id != 0) {
+            power_monitor.disconnect (system_battery_state_id);
         }
         connection.close ();
     }
 
     /**
-     * Add subscription to power events to a network connection.
+     * Handler to emit system battery state messages to a client.
      */
-    async void watch_power (OutputStream out_stream) {
-        // TODO: 
+    async void handle_connection_system_battery_state (OutputStream out_stream) throws Error {
+        switch (power_monitor.system_battery_state) {
+            case BatteryState.LOW:
+                yield write_line_async (out_stream, "MSG WARN Battery is getting low");
+                break;
+            case BatteryState.CRITICAL:
+                yield write_line_async (out_stream, "MSG CRITICAL System is shutting down due to low battery");
+                break;
+            }
+    }
+
+    /**
+     * Handler to emit system battery voltage messages to a client.
+     */
+    async void handle_connection_system_battery_voltage (OutputStream out_stream) throws Error {
+        yield write_line_async (out_stream,
+            "MSG PROPERTY system.battery.voltage %d".printf (power_monitor.system_battery_voltage));
     }
 }
 
