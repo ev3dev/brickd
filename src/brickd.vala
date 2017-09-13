@@ -23,6 +23,7 @@
 class BrickApp : Application {
     PowerMonitor power_monitor;
     SocketListener listener;
+    bool running;
 
     public BrickApp () {
         Object ();
@@ -44,6 +45,7 @@ class BrickApp : Application {
 
     public override void activate () {
         try {
+            running = true;
             power_monitor = new PowerMonitor ();
             power_monitor.notify["system-battery-state"].connect ((s, p) => {
                 handle_system_battery_state ();
@@ -63,6 +65,13 @@ class BrickApp : Application {
             stderr.printf ("Failed to start: %s", err.message);
             Process.exit (1);
         }
+    }
+
+    public override void shutdown () {
+        base.shutdown ();
+        running = false;
+        // close all client connections
+        listener.close ();
     }
 
     /**
@@ -97,7 +106,7 @@ class BrickApp : Application {
      * Loop for handling incoming network connections.
      */
     async void run_listener () {
-        while (true) {
+        while (running) {
             try {
                 var connection = yield listener.accept_async ();
                 handle_connection.begin (connection);
@@ -140,7 +149,7 @@ class BrickApp : Application {
                 });
                 yield handle_connection_system_battery_state (out_stream);
 
-                while (true) {
+                while (running) {
                     reply = yield in_stream.read_line_async ();
                     if (reply == null) {
                         continue;
