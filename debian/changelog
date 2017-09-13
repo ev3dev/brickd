@@ -1,5 +1,5 @@
-brickd (1.0.0~1) testing; urgency=medium
+brickd (1.0.0) testing; urgency=medium
 
   * Initial release
 
- -- David Lechner <david@lechnology.com>  Mon, 28 Aug 2017 13:17:22 -0500
+ -- David Lechner <david@lechnology.com>  Wed, 13 Sep 2017 18:54:42 -0500
