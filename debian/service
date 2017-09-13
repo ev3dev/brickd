@@ -1,0 +1,11 @@
+[Unit]
+Description=Brick Daemon
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/brickd
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=default.target
