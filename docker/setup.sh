@@ -21,7 +21,7 @@ fi
 
 build_dir="build-$arch"
 image_name="brickd-$arch"
-container_name="brickd$arch"
+container_name="brickd_$arch"
 
 mkdir -p $build_dir
 
