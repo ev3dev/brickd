@@ -135,6 +135,13 @@ sealed class Supply: Object {
                     break;
                 }
                 break;
+            case "brickpi-battery":
+            case "brickpi3-battery":
+                full_voltage = 10000;
+                empty_voltage = 8500;
+                low_warn_voltage = 8000;
+                low_shutdown_voltage = 7000;
+                break;
             case "pistorms-battery":
                 full_voltage = 8100;
                 empty_voltage = 6500;
