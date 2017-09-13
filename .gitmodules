@@ -1,0 +1,4 @@
+
+[submodule "cmake"]
+	path = cmake
+	url = https://github.com/dlech/vala-cmake-modules.git

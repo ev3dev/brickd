@@ -1,0 +1,2 @@
+
+const string BRICKD_VERSION = "@PROJECT_VERSION@";
