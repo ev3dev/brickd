@@ -32,6 +32,7 @@ class BrickApp : Application {
 
     void setup_signal_handlers () {
         Unix.signal_add (Posix.SIGINT, () => {
+            // chain up to SIGTERM handler to prevent double-release of app
             Posix.kill (Posix.getpid (), Posix.SIGTERM);
             return Source.REMOVE;
         });
@@ -46,13 +47,14 @@ class BrickApp : Application {
             power_monitor = new PowerMonitor ();
             power_monitor.system_battery_event.connect (handle_system_battery_event);
 
+            // just listen on localhost to prevent remote meddling
             listener = new SocketListener ();
             var ipv4_addr = new InetSocketAddress (new InetAddress.loopback (SocketFamily.IPV4), 31313);
             var ipv6_addr = new InetSocketAddress (new InetAddress.loopback (SocketFamily.IPV6), 31313);
-            SocketAddress effictive;
-            listener.add_address (ipv4_addr, SocketType.STREAM, SocketProtocol.TCP, null, out effictive);
-            listener.add_address (ipv6_addr, SocketType.STREAM, SocketProtocol.TCP, null, out effictive);
-            start_listener.begin ();
+            SocketAddress effective;
+            listener.add_address (ipv4_addr, SocketType.STREAM, SocketProtocol.TCP, null, out effective);
+            listener.add_address (ipv6_addr, SocketType.STREAM, SocketProtocol.TCP, null, out effective);
+            run_listener.begin ();
         }
         catch (Error err) {
             stderr.printf ("Failed to start: %s", err.message);
@@ -60,6 +62,9 @@ class BrickApp : Application {
         }
     }
 
+    /**
+     * Global handler for system battery events.
+     */
     void handle_system_battery_event (BatteryState state) {
         switch (state) {
         case BatteryState.LOW:
@@ -84,7 +89,10 @@ class BrickApp : Application {
         }
     }
 
-    async void start_listener () {
+    /**
+     * Loop for handling incoming network connections.
+     */
+    async void run_listener () {
         while (true) {
             try {
                 var connection = yield listener.accept_async ();
@@ -96,11 +104,18 @@ class BrickApp : Application {
         }
     }
 
+    /**
+     * Helper function to simplify cal to OutputStream.write_async ().
+     */
     static async void write_line_async (OutputStream stream, string msg) throws Error {
-        var data = "%s\n".printf (msg).to_utf8 ();
-        yield stream.write_async ((uint8[])data);
+        var builder = new StringBuilder (msg);
+        builder.append_c ('\n');
+        yield stream.write_async (builder.data);
     }
 
+    /**
+     * Loop for handling a single network connection.
+     */
     async void handle_connection (SocketConnection connection) throws Error {
         var in_stream = new DataInputStream (connection.input_stream);
         var out_stream = connection.output_stream;
@@ -109,6 +124,7 @@ class BrickApp : Application {
         try {
             yield write_line_async (out_stream, "BRICKD VERSION %s".printf (BRICKD_VERSION));
             var reply = yield in_stream.read_line_async ();
+            // I am not a robot...
             if (reply == null || reply.strip ().up () != "YOU ARE A ROBOT") {
                 yield write_line_async (out_stream, "BAD You don't know the secret handshake");
             }
@@ -173,6 +189,9 @@ class BrickApp : Application {
         connection.close ();
     }
 
+    /**
+     * Add subscription to power events to a network connection.
+     */
     async void watch_power (OutputStream out_stream) {
         // TODO: 
     }

@@ -39,9 +39,7 @@ enum BatteryState {
 }
 
 /**
- * This class provideds power monitoring capabilites. It will notifiy users
- * if the battery gets to low and will shut down the system if it gets
- * critically low.
+ * This class provides power monitoring capabilities.
  */
 sealed class PowerMonitor: Object {
     Client client;
