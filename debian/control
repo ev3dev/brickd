@@ -5,7 +5,6 @@ Build-Depends: debhelper (>= 10),
     cmake (>= 3),
     libglib2.0-dev,
     libgudev-1.0-dev,
-    pandoc,
     pkg-config,
     valac
 Standards-Version: 3.9.8
@@ -16,7 +15,7 @@ Vcs-Browser: https://github.com/ev3dev/brickd
 
 Package: brickd
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, console-runner
+Depends: ${shlibs:Depends}, ${misc:Depends}, bsdutils, systemd-sysv
 Description: Brick daemon
  Daemon that monitors ev3dev devices. It does things like automatic shutdown
  when the battery gets low. It also provides a TCP server for remote monitoring.
