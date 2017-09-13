@@ -25,7 +25,7 @@ class BrickApp : Application {
     SocketListener listener;
 
     public BrickApp () {
-        Object (application_id: "org.ev3dev.brickpower", flags: 0);
+        Object ();
         hold ();
         setup_signal_handlers ();
     }
