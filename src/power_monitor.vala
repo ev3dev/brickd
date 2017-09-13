@@ -135,6 +135,12 @@ sealed class Supply: Object {
                     break;
                 }
                 break;
+            case "pistorms-battery":
+                full_voltage = 8100;
+                empty_voltage = 6500;
+                low_warn_voltage = 6000;
+                low_shutdown_voltage = 5000;
+                break;
             default:
                 // full voltage is 85% of max design
                 full_voltage = int.parse (device.get_property ("POWER_SUPPLY_VOLTAGE_MAX_DESIGN")) / 1000 * 85 / 100;
