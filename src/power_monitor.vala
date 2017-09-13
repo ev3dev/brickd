@@ -116,6 +116,7 @@ sealed class Supply: Object {
             // own values.
             switch (name) {
             case "lego-ev3-battery":
+            case "evb-battery":
                 // EV3 numbers are taken from the official LEGO source code
                 switch (technology) {
                 // TODO: handle case for NiMH
