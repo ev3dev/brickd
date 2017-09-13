@@ -46,7 +46,6 @@ sealed class PowerMonitor: Object {
     HashTable<string, Supply> supplies;
     Binding? system_battery_state_binding;
     Binding? system_battery_voltage_binding;
-    ulong uevent_id;
 
     /**
      * Gets the state of the system battery or BatteryState.OK if there is no
@@ -63,14 +62,9 @@ sealed class PowerMonitor: Object {
         Object ();
         supplies = new HashTable<string, Supply> (str_hash, str_equal);
         client = new Client ({ "power_supply" });
-        uevent_id = client.uevent.connect (handle_uevent);
+        client.uevent.connect (handle_uevent);
         var list = client.query_by_subsystem ("power_supply");
         list.foreach (device => handle_uevent ("add", device));
-    }
-
-    ~PowerMonitor () {
-        client.disconnect (uevent_id);
-        supplies.foreach ((key, val) => handle_uevent ("remove", val.device));
     }
 
     void handle_uevent (string action, Device device) {
