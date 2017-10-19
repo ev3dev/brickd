@@ -107,6 +107,6 @@ for the `system.battery.voltage` property.
 
 ### Properties
 
-`system.info.serial` (since 1.1.0) is the serial number of the device.
+`system.info.serial` (since 1.1.0) is the serial number of the main board.
 
 `system.battery.voltage` is the current battery voltage in millivolts.
