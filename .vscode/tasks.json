@@ -19,6 +19,18 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "taskName": "Build armel",
+            "problemMatcher": "$valac",
+            "type": "shell",
+            "command": "docker",
+            "args": [
+                "exec",
+                "--tty",
+                "brickd_armel",
+                "make"
+            ]
         }
     ]
 }
