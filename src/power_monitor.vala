@@ -262,9 +262,9 @@ sealed class Supply: Object {
      * Poll the system battery for changes.
      */
     bool handle_timeout () {
-        // have to change at least 0.01V before updating the voltage property
+        // have to change at least 0.05V before updating the voltage property
         var new_voltage = _get_voltage ();
-        if ((voltage - new_voltage).abs () >= 10) {
+        if ((voltage - new_voltage).abs () >= 50) {
             voltage = new_voltage;
         }
         var new_state = _get_battery_state ();
