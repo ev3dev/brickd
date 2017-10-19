@@ -83,7 +83,7 @@ connection.
 
     "BYE" "\n"
 
-**GET**
+**GET** (since 1.1.0)
 
 Requests a property value. Valid keys are listed in the *Properties* section
 below.
@@ -107,6 +107,6 @@ for the `system.battery.voltage` property.
 
 ### Properties
 
-`system.info.serial` is the serial number of the device.
+`system.info.serial` (since 1.1.0) is the serial number of the device.
 
 `system.battery.voltage` is the current battery voltage in millivolts.
