@@ -1,3 +1,10 @@
+brickd (1.1.0) testing; urgency=medium
+
+  * Add new GET command for getting property values
+  * Add new system.info.serial property
+
+ -- David Lechner <david@lechnology.com>  Thu, 19 Oct 2017 13:29:40 -0500
+
 brickd (1.0.0) testing; urgency=medium
 
   * Initial release
