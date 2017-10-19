@@ -83,12 +83,30 @@ connection.
 
     "BYE" "\n"
 
+**GET**
+
+Requests a property value. Valid keys are listed in the *Properties* section
+below.
+
+    "GET" " " key "\n"
+
+The response will `BAD` if an invalid key is requested. Otherwise, it will
+return `OK` along with the value.
+
+    "OK" " " value "\n"
+
 **WATCH**
 
 Subscribes to additional `MSG` notifications.
 
     "WATCH" subsystem "\n"
 
-Currently, the only subsystem is `POWER`. This will enable messages for the
-`system.battery.voltage` property. The value is the current battery voltage in
-millivolts.
+Currently, the only subsystem is `POWER`. This will enable broadcast messages
+for the `system.battery.voltage` property.
+
+
+### Properties
+
+`system.info.serial` is the serial number of the device.
+
+`system.battery.voltage` is the current battery voltage in millivolts.

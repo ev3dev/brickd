@@ -21,6 +21,7 @@
  */
 
 class BrickApp : Application {
+    BoardInfo main_board;
     PowerMonitor power_monitor;
     SocketListener listener;
     bool running;
@@ -46,6 +47,7 @@ class BrickApp : Application {
     public override void activate () {
         try {
             running = true;
+            main_board = new BoardInfo ("main");
             power_monitor = new PowerMonitor ();
             power_monitor.notify["system-battery-state"].connect ((s, p) => {
                 handle_system_battery_state ();
@@ -165,6 +167,19 @@ class BrickApp : Application {
                         continue;
                     }
                     switch (parts[0].up ()) {
+                    case "GET":
+                        switch (parts[1]) {
+                        case "system.info.serial":
+                            yield write_line_async (out_stream, "OK %s".printf(main_board.serial_number));
+                            break;
+                        case "system.battery.voltage":
+                            yield write_line_async (out_stream, "OK %d".printf(power_monitor.system_battery_voltage));
+                            break;
+                        default:
+                            yield write_line_async (out_stream, "BAD Unknown property key");
+                            break;
+                        }
+                        break;
                     case "WATCH":
                         switch (parts[1].up ()) {
                         case "POWER":

@@ -23,6 +23,7 @@ vala2c(BRICKD_C_FILES
         2.48
     SOURCE_FILES
         ${CMAKE_CURRENT_BINARY_DIR}/version.vala
+        board_info.vala
         brickd.vala
         power_monitor.vala
 )
