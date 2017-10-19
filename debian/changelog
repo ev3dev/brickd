@@ -1,3 +1,9 @@
+brickd (1.1.1) testing; urgency=medium
+
+  * Change battery voltage deadband from 0.01V to 0.05V
+
+ -- David Lechner <david@lechnology.com>  Thu, 19 Oct 2017 15:37:19 -0500
+
 brickd (1.1.0) testing; urgency=medium
 
   * Add new GET command for getting property values
