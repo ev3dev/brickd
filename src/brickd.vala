@@ -62,7 +62,7 @@ class BrickApp : Application {
             run_listener.begin ();
         }
         catch (Error err) {
-            stderr.printf ("Failed to start: %s", err.message);
+            stderr.printf ("Failed to start: %s\n", err.message);
             Process.exit (1);
         }
     }
