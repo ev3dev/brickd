@@ -157,7 +157,9 @@ class BrickApp : Application {
                 while (running) {
                     reply = yield in_stream.read_line_async ();
                     if (reply == null) {
-                        continue;
+                        /* client probably disconnected */
+                        debug ("Disconnected");
+                        break;
                     }
                     reply = reply.strip ();
                     if (reply.up () == "BYE") {
