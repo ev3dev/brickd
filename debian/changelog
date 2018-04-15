@@ -1,3 +1,10 @@
+brickd (1.1.2) stable; urgency=medium
+
+  * Don't shut down when battery is not connected
+  * Prevent infinite loop when clinet disconnects
+
+ -- David Lechner <david@lechnology.com>  Sat, 14 Apr 2018 23:13:14 -0500
+
 brickd (1.1.1) testing; urgency=medium
 
   * Change battery voltage deadband from 0.01V to 0.05V
