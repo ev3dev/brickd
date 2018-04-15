@@ -1,7 +1,7 @@
 /*
  * brickd.vala
  *
- * Copyright (c) 2017 David Lechner <david@lechnology.com>
+ * Copyright (c) 2017-2018 David Lechner <david@lechnology.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,6 +81,9 @@ class BrickApp : Application {
      */
     void handle_system_battery_state () {
         switch (power_monitor.system_battery_state) {
+        case BatteryState.NOT_PRESENT:
+            warning ("Battery not present");
+            break;
         case BatteryState.LOW:
             try {
                 var wall = new Subprocess (SubprocessFlags.NONE, "/usr/bin/wall",

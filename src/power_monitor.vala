@@ -1,7 +1,7 @@
 /*
  * power_monitor.vala
  *
- * Copyright (c) 2017 David Lechner <david@lechnology.com>
+ * Copyright (c) 2017-2018 David Lechner <david@lechnology.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,12 @@ enum BatteryState {
     /**
      * Battery is dangerously low.
      */
-    CRITICAL
+    CRITICAL,
+
+    /**
+     * Battery is probably not connected.
+     */
+    NOT_PRESENT
 }
 
 /**
@@ -135,6 +140,8 @@ sealed class Supply: Object {
                     low_shutdown_voltage = 4500;
                     break;
                 }
+                /* EVB show ~0.01V when powered from USB */
+                not_present_voltage = 500;
                 break;
             case "brickpi-battery":
             case "brickpi3-battery":
@@ -142,6 +149,8 @@ sealed class Supply: Object {
                 empty_voltage = 8500;
                 low_warn_voltage = 8000;
                 low_shutdown_voltage = 7000;
+                /* brickpi3 back-feeds voltage from USB at slightly above 4V */
+                not_present_voltage = 4200;
                 break;
             case "pistorms-battery":
                 full_voltage = 8100;
@@ -244,11 +253,19 @@ sealed class Supply: Object {
     public int low_shutdown_voltage { get; private set; }
 
     /**
+     * Get the voltage that triggers a "not present" state.
+     */
+    public int not_present_voltage { get; private set; }
+
+    /**
      * Get the battery state.
      */
     public BatteryState battery_state { get; private set; }
 
     BatteryState _get_battery_state () {
+        if (voltage < not_present_voltage) {
+            return BatteryState.NOT_PRESENT;
+        }
         if (voltage < low_shutdown_voltage) {
             return BatteryState.CRITICAL;
         }
