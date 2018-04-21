@@ -1,3 +1,9 @@
+brickd (1.1.3) stable; urgency=medium
+
+  * Increase BrickPi3 "not present" voltage
+
+ -- David Lechner <david@lechnology.com>  Sat, 21 Apr 2018 15:50:08 -0500
+
 brickd (1.1.2) stable; urgency=medium
 
   * Don't shut down when battery is not connected
