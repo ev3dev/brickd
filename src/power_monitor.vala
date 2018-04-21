@@ -150,7 +150,7 @@ sealed class Supply: Object {
                 low_warn_voltage = 8000;
                 low_shutdown_voltage = 7000;
                 /* brickpi3 back-feeds voltage from USB at slightly above 4V */
-                not_present_voltage = 4200;
+                not_present_voltage = 4500;
                 break;
             case "pistorms-battery":
                 full_voltage = 8100;
