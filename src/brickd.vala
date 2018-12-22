@@ -84,7 +84,7 @@ class BrickApp : Application {
         case BatteryState.NOT_PRESENT:
             warning ("Battery not present");
             break;
-        case BatteryState.LOW:
+        case BatteryState.LOW_VOLT:
             try {
                 var wall = new Subprocess (SubprocessFlags.NONE, "/usr/bin/wall",
                     "Low battery. Power off or connect a charger soon.");
@@ -94,9 +94,29 @@ class BrickApp : Application {
                 critical ("%s", err.message);
             }
             break;
-        case BatteryState.CRITICAL:
+        case BatteryState.CRITICAL_LOW_VOLT:
             try {
                 message ("Critical battery level. Powering off NOW!");
+                var poweroff = new Subprocess (SubprocessFlags.NONE, "/sbin/poweroff");
+                poweroff.wait_async.begin ();
+            }
+            catch (Error err) {
+                critical ("%s", err.message);
+            }
+            break;
+        case BatteryState.HIGH_TEMP:
+            try {
+                var wall = new Subprocess (SubprocessFlags.NONE, "/usr/bin/wall",
+                    "High battery temperature. Stop motors and let things cool down for a while.");
+                wall.wait_async.begin ();
+            }
+            catch (Error err) {
+                critical ("%s", err.message);
+            }
+            break;
+        case BatteryState.CRITICAL_HIGH_TEMP:
+            try {
+                message ("Critical battery temperature. Powering off NOW!");
                 var poweroff = new Subprocess (SubprocessFlags.NONE, "/sbin/poweroff");
                 poweroff.wait_async.begin ();
             }
@@ -230,11 +250,17 @@ class BrickApp : Application {
      */
     async void handle_connection_system_battery_state (OutputStream out_stream) throws Error {
         switch (power_monitor.system_battery_state) {
-            case BatteryState.LOW:
+            case BatteryState.LOW_VOLT:
                 yield write_line_async (out_stream, "MSG WARN Battery is getting low");
                 break;
-            case BatteryState.CRITICAL:
+            case BatteryState.CRITICAL_LOW_VOLT:
                 yield write_line_async (out_stream, "MSG CRITICAL System is shutting down due to low battery");
+                break;
+            case BatteryState.HIGH_TEMP:
+                yield write_line_async (out_stream, "MSG WARN Battery temperature is getting high");
+                break;
+            case BatteryState.CRITICAL_HIGH_TEMP:
+                yield write_line_async (out_stream, "MSG CRITICAL System is shutting down due to high battery temperature");
                 break;
             }
     }
