@@ -21,7 +21,7 @@
  */
 
 class BrickApp : Application {
-    BoardInfo main_board;
+    BoardInfo? main_board;
     PowerMonitor power_monitor;
     SocketListener listener;
     bool running;
@@ -47,7 +47,16 @@ class BrickApp : Application {
     public override void activate () {
         try {
             running = true;
-            main_board = new BoardInfo ("main");
+            try {
+                main_board = new BoardInfo ("main");
+            }
+            catch (BoardInfoError err) {
+                if (!(err is BoardInfoError.NOT_FOUND)) {
+                    throw err;
+                }
+                // board info is optional
+                warning ("Board info not found");
+            }
             power_monitor = new PowerMonitor ();
             power_monitor.notify["system-battery-state"].connect ((s, p) => {
                 handle_system_battery_state ();
@@ -195,7 +204,12 @@ class BrickApp : Application {
                     case "GET":
                         switch (parts[1]) {
                         case "system.info.serial":
-                            yield write_line_async (out_stream, "OK %s".printf(main_board.serial_number));
+                            if (main_board == null) {
+                                yield write_line_async (out_stream, "BAD Board info not found");
+                            }
+                            else {
+                                yield write_line_async (out_stream, "OK %s".printf(main_board.serial_number));
+                            }
                             break;
                         case "system.battery.voltage":
                             yield write_line_async (out_stream, "OK %d".printf(power_monitor.system_battery_voltage));
