@@ -1,3 +1,10 @@
+brickd (1.2.0) stable; urgency=medium
+
+  * Add EV3 battery temperature estimation from lms2012
+  * make board info optional
+
+ -- David Lechner <david@lechnology.com>  Fri, 11 Jan 2019 16:42:55 -0600
+
 brickd (1.1.4) stable; urgency=medium
 
   * Increase brickpi3 not present voltage to 4.75V
