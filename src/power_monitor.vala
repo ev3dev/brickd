@@ -153,8 +153,8 @@ sealed class Supply: Object {
                     empty_voltage = 6200;
                     low_warn_voltage = 5500;
                     low_shutdown_voltage = 4500;
-                    high_temp_warn = 40.0f;
-                    high_temp_shutdown = 45.0f;
+                    high_temp_warn = 25.0f;
+                    high_temp_shutdown = 30.0f;
                     monitor_temperature = true;
                     break;
                 }
