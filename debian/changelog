@@ -1,3 +1,9 @@
+brickd (1.2.1) stable; urgency=medium
+
+  * adjust EV3 battery monitor setpoints
+
+ -- David Lechner <david@lechnology.com>  Mon, 18 Feb 2019 15:18:22 -0600
+
 brickd (1.2.0) stable; urgency=medium
 
   * Add EV3 battery temperature estimation from lms2012
