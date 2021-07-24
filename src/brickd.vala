@@ -1,7 +1,7 @@
 /*
  * brickd.vala
  *
- * Copyright (c) 2017-2018 David Lechner <david@lechnology.com>
+ * Copyright (c) 2017-2018,2021 David Lechner <david@lechnology.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,12 +33,12 @@ class BrickApp : Application {
     }
 
     void setup_signal_handlers () {
-        Unix.signal_add (Posix.SIGINT, () => {
+        Unix.signal_add (Posix.Signal.INT, () => {
             // chain up to SIGTERM handler to prevent double-release of app
-            Posix.kill (Posix.getpid (), Posix.SIGTERM);
+            Posix.kill (Posix.getpid (), Posix.Signal.TERM);
             return Source.REMOVE;
         });
-        Unix.signal_add (Posix.SIGTERM, () => {
+        Unix.signal_add (Posix.Signal.TERM, () => {
             release ();
             return Source.REMOVE;
         });
