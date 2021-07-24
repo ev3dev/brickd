@@ -1,7 +1,7 @@
 /*
  * power_monitor.vala
  *
- * Copyright (c) 2017-2018 David Lechner <david@lechnology.com>
+ * Copyright (c) 2017-2018,2021 David Lechner <david@lechnology.com>
  * Copyright (C) 2010-2013 The LEGO Group
  *
  * This program is free software: you can redistribute it and/or modify
@@ -57,7 +57,7 @@ enum BatteryState {
 /**
  * This class provides power monitoring capabilities.
  */
-sealed class PowerMonitor: Object {
+class PowerMonitor: Object {
     Client client;
     HashTable<string, Supply> supplies;
     Binding? system_battery_state_binding;
@@ -118,7 +118,7 @@ sealed class PowerMonitor: Object {
     }
 }
 
-sealed class Supply: Object {
+class Supply: Object {
     public Device device;
     uint timeout_id;
     int battery_state_debounce;
